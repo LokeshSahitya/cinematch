@@ -123,7 +123,7 @@ styleEl.textContent = globalCSS;
 document.head.appendChild(styleEl);
 
 /* ─── Config ─────────────────────────────────────────────────────────────── */
-const API_BASE = "http://localhost:8000/api";
+const API_BASE = import.meta.env.VITE_API_URL;
 const api = {
   async get(path) {
     try {
