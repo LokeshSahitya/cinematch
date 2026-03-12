@@ -12,8 +12,8 @@ const globalCSS = `
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   html { scroll-behavior: smooth; }
   body {
-    background: #0c0b0e;
-    color: #e8e0d4;
+    background: #1b1a1f;
+    color: #f2eadf;
     font-family: 'DM Sans', sans-serif;
     overflow-x: hidden;
   }
