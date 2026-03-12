@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+venv/
+.env
+*.log
+
+# Data files (too large for GitHub)
+backend/app/data/raw/
+backend/app/data/processed/
+*.dat
+*.csv
+*.zip
+
+# Node
+node_modules/
+frontend/dist/
+frontend/.env
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# ML Models (can be large)
+*.pkl
+*.joblib
+*.h5

@@ -1,0 +1,59 @@
+# CineMatch — Docker Compose
+# ─────────────────────────────────────────────────────────────────────────────
+# Local dev:   docker-compose up
+# Production:  docker-compose -f docker-compose.yml -f docker-compose.prod.yml up
+# ─────────────────────────────────────────────────────────────────────────────
+
+version: "3.9"
+
+services:
+  # ── FastAPI ML Backend ────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: cinematch-backend
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=production
+      - ALLOWED_ORIGINS=http://localhost:3000,http://frontend
+    volumes:
+      # Mount data dir so dataset persists across rebuilds
+      - ./backend/app/data:/app/app/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s   # ML model loading takes ~30s
+    restart: unless-stopped
+
+  # ── React Frontend ────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=http://localhost:8000/api
+    container_name: cinematch-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── Nginx Reverse Proxy (optional, for single-domain deploy) ─────────────
+  # nginx:
+  #   image: nginx:alpine
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./deploy/nginx.conf:/etc/nginx/conf.d/default.conf
+  #     - ./deploy/certs:/etc/nginx/certs
+  #   depends_on: [backend, frontend]
+
+volumes:
+  data:
