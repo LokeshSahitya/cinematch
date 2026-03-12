@@ -1,37 +1,33 @@
-# ── CineMatch Backend — Production Dockerfile ──────────────────────────────
-# Multi-stage build: keeps final image lean by separating build deps
-
 FROM python:3.11-slim AS base
 
-# System deps (for scikit-surprise C build)
+# System dependencies required for scikit-surprise compilation
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc g++ build-essential && \
-    rm -rf /var/lib/apt/lists/*
+    gcc \
+    g++ \
+    build-essential \
+    python3-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# ── Dependency layer (cached unless requirements.txt changes) ───────────────
+# ── Dependency layer ─────────────────────────────
 FROM base AS deps
 COPY requirements.txt .
-RUN pip install --no-cache-dir --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
 
-# ── App layer ───────────────────────────────────────────────────────────────
+RUN pip install --upgrade pip setuptools wheel && \
+    pip install --no-cache-dir --no-build-isolation -r requirements.txt
+
+# ── Runtime layer ───────────────────────────────
 FROM deps AS runtime
 COPY . .
 
-# Download MovieLens 1M at build time so startup is fast
+# Download dataset at build time
 RUN python scripts/setup_data.py
 
-# Non-root user for security
+# Non-root user
 RUN useradd -m cinematch && chown -R cinematch /app
 USER cinematch
 
 EXPOSE 8000
 
-# Gunicorn with uvicorn workers for production
-CMD ["uvicorn", "app.main:app", \
-     "--host", "0.0.0.0", \
-     "--port", "8000", \
-     "--workers", "2", \
-     "--timeout-keep-alive", "30"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "2"]
