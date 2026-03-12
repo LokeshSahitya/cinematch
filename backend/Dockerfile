@@ -15,6 +15,7 @@ FROM base AS deps
 COPY requirements.txt .
 
 RUN pip install --upgrade pip setuptools wheel && \
+    pip install "numpy<2.0" && \
     pip install --no-cache-dir --no-build-isolation -r requirements.txt
 
 # ── Runtime layer ───────────────────────────────
