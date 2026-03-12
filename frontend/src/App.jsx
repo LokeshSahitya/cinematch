@@ -127,7 +127,7 @@ const API_BASE = import.meta.env.VITE_API_URL;
 const api = {
   async get(path) {
     try {
-      const r = await fetch(`${API_BASE}/api/health`);
+      const r = await fetch(`${API_BASE}/api${path}`);
       if (!r.ok) throw new Error(r.status);
       return r.json();
     } catch { return null; }
